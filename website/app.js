@@ -1,100 +1,96 @@
-/* Global Variables */
-const baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
+// Global variables
+const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';  // OpenWeather API base URL
 const apiKey = 'c90de487d4a5915be354e8cd2c477a73';
+const submitButton = document.getElementById('generate');  // The "Generate" button
 
-// Create a new date instance dynamically with JS
-let d = new Date();
-let newDate = d.getMonth() + '.' + d.getDate() + '.' + d.getFullYear();
+// Initialize the app by adding event listener for button click
+submitButton.addEventListener('click', handleWeatherRequest);
 
-
-// Event listener to add function to existing HTML DOM element
-const generateBtn = document.getElementById('generate');
-generateBtn.addEventListener('click', performAction);
-
-/* Function called by event listener */
-function performAction(e) {
-    e.preventDefault();
-
-    // Get user input
-    const zipCode = document.getElementById('zip').value;
-    const content = document.getElementById('feelings').value;
-
-    if (zipCode !== '') {
-        generateBtn.classList.remove('invalid');
-        getWeatherData(baseUrl, zipCode, apiKey)
-            .then(function(data) {
-                // Add data to POST request
-                postData('http://localhost:3000/add', { temp: convertKelvinToCelsius(data.main.temp), date: newDate, content: content });
-            }).then(function() {
-                // Call updateUI to update browser content
-                updateUI();
-            }).catch(function(error) {
-                console.log(error);
-                alert('The zip code is invalid. Try again');
-            });
-        // Reset the form fields after submission
-        document.getElementById('zip').value = '';
-        document.getElementById('feelings').value = '';
-    } else {
-        generateBtn.classList.add('invalid');
-    }
-}
-
-/* Function to GET Web API Data */
-const getWeatherData = async (baseUrl, zipCode, apiKey) => {
-    const res = await fetch(`${baseUrl}?q=${zipCode}&appid=${apiKey}`);
-    try {
-        const data = await res.json();
-        return data;
-    } catch (error) {
-        console.log('error', error);
-    }
+// Fetch weather data from OpenWeather API
+const getWeatherData = (apiUrl, postalCode, apiKey) => {
+    return fetch(`${apiUrl}?q=${postalCode}&appid=${apiKey}`)
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("Fetched Weather Data:", data); // Log API response
+            return data;
+        })
+        .catch((error) => {
+            console.error('Error fetching weather data:', error);
+            throw error; // Propagate error
+        });
 };
 
-/* Function to POST data */
-const postData = async (url = '', data = {}) => {
-    const response = await fetch(url, {
+// Send data to server
+const sendDataToServer = (url = '', data = {}) => {
+    return fetch(url, {
         method: 'POST',
         credentials: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            temp: data.temp,
-            date: data.date,
-            content: data.content,
-        }),
-    });
-
-    try {
-        const newData = await response.json();
-        return newData;
-    } catch (error) {
-        console.log(error);
-    }
+        body: JSON.stringify(data),
+    })
+        .then((response) => response.json())
+        .then((responseData) => {
+            console.log("Server Response:", responseData); // Log server response
+            return responseData;
+        })
+        .catch((error) => {
+            console.error('Error posting data:', error);
+            throw error; // Propagate error
+        });
 };
 
-const updateUI = async () => {
-    const request = await fetch('http://localhost:3000/all');
-    try {
-        const allData = await request.json();
-        console.log(allData);
-        // Update new entry values
-        if (allData.date !== undefined && allData.temp !== undefined && allData.content !== undefined) {
-            document.getElementById('date').innerHTML = allData.date;
-            document.getElementById('temp').innerHTML = allData.temp + ' degree C';
-            document.getElementById('content').innerHTML = allData.content;
-        }
-    } catch (error) {
-        console.log('error', error);
-    }
+// Update the UI with fetched data
+const refreshUI = () => {
+    return fetch('http://localhost:3000/all')
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("UI Data:", data); // Log data being used to update UI
+            document.getElementById('date').innerHTML = `Date: ${data.date}`;
+            document.getElementById('temp').innerHTML = `Temperature: ${data.temperature}°K`;  // Kelvin is shown
+            document.getElementById('content').innerHTML = `Feeling: ${data.userContent}`;
+        })
+        .catch((error) => {
+            console.error('Error refreshing UI:', error);
+        });
 };
 
-// Helper function to convert temperature from Kelvin to Celsius
-function convertKelvinToCelsius(kelvin) {
-    if (kelvin < 0) {
-        return 'below absolute zero (0 K)';
+// Handle weather request by fetching data, sending to server, and updating UI
+function handleWeatherRequest(event) {
+    event.preventDefault();
+
+    const postalCode = document.getElementById('zip').value;
+    const userContent = document.getElementById('feelings').value;
+
+    console.log("Postal Code:", postalCode);  // Log zip code
+    console.log("User Content:", userContent); // Log feelings
+
+    // Check if postal code is valid
+    if (postalCode !== '') {
+        // If valid, fetch weather data, send it to server, and update UI
+        getWeatherData(apiUrl, postalCode, apiKey)
+            .then((weatherData) => {
+                const formattedDate = new Date().toLocaleString(); // Current date and time
+                const dataToSend = {
+                    temperature: weatherData.main.temp,
+                    date: formattedDate,
+                    userContent: userContent
+                };
+                return sendDataToServer('http://localhost:3000/add', dataToSend);
+            })
+            .then(() => {
+                return refreshUI();
+            })
+            .catch((error) => {
+                console.error('Error during weather request:', error);
+                alert('Invalid zip code. Please try again.');
+            });
+
+        // Clear input fields after submission
+        document.getElementById('zip').value = '';
+        document.getElementById('feelings').value = '';
     } else {
-        return (kelvin - 273.15).toFixed(2);
+        submitButton.classList.add('invalid'); // Highlight the button if zip code is empty
     }
 }

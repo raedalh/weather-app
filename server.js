@@ -1,45 +1,47 @@
-// Setup empty JS object to act as endpoint for all routes
+// Create an empty object to store project data
 let projectData = {};
 
-// Require Express to run server and routes
+// Import Express to run server and routes
 const express = require('express');
 
-// Start up an instance of app
+// Create an instance of the app
 const app = express();
 
-/* Middleware*/
-// Replacing body-parser with express built-in middleware
+/* Middleware */
+// Use Express built-in middleware for parsing URL-encoded data and JSON
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Cors for cross-origin allowance
+// Enable Cross-Origin Resource Sharing (CORS)
 const cors = require('cors');
 app.use(cors());
 
-// Initialize the main project folder
+// Serve static files from the 'website' folder
 app.use(express.static('website'));
 
-// POST route
-app.post('/add', addInfo);
+// Define POST route to handle incoming data
+app.post('/add', storeWeatherData);
 
-function addInfo(req, res) {
-    // Store the data coming in the body of the request
-    projectData['temp'] = req.body.temp;
+function storeWeatherData(req, res) {
+    // Store incoming data in the projectData object
+    projectData['temperature'] = req.body.temp;
     projectData['date'] = req.body.date;
-    projectData['content'] = req.body.content;
-    res.send(projectData); // Send back the data as a response
+    projectData['userContent'] = req.body.content;
+
+    // Send the stored data as a response
+    res.send(projectData);
 }
 
-// Initialize all route with a callback function
-app.get('/all', getInfo);
+// Define GET route to return all stored data
+app.get('/all', fetchStoredData);
 
-// Callback function to complete GET '/all'
-function getInfo(req, res) {
+function fetchStoredData(req, res) {
+    // Return the projectData object as a response
     res.send(projectData);
-};
+}
 
-// Set up and Spin up the server
-const port = 3000;  // Use 3000 or the appropriate port
+// Set the server to listen on port 3000
+const port = 3000;
 const server = app.listen(port, () => {
-    console.log(`Server is listening on port: ${port}`); // Callback to debug
+    console.log(`Server running on port: ${port}`);
 });
