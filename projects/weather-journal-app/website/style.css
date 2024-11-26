@@ -1,0 +1,113 @@
+/* General Body Styling */
+body {
+    background: #fffff8;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 20px;
+    margin: 0;
+}
+
+/* Main App Container */
+#app {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-gap: 2em;
+    height: auto;
+    background: #f23557;
+    color: #f0d43a;
+    justify-content: center;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Oswald', sans-serif;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Headline */
+.headline {
+    font-size: 2.5em;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Form Section (Zip Code & Feelings) */
+.holder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Label */
+label {
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+/* Zipcode Input Field */
+input {
+    padding: 10px;
+    width: 250px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* Feelings Textarea */
+textarea {
+    width: 250px;
+    padding: 10px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: #f5f5f5;
+    color: #333;
+    resize: vertical;
+}
+
+/* Button */
+button {
+    padding: 15px;
+    font-size: 1.3em;
+    background-color: #3b4a6b;
+    color: #f0d43a;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: #4a5b7f;
+}
+
+/* Entry Section */
+.entry {
+    background: rgba(59, 74, 107, .6);
+    padding: 20px;
+    border-radius: 5px;
+    color: #fff;
+    text-align: center;
+}
+
+.entry .title {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+/* Individual Entry Details */
+#entryHolder {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#date, #temp, #content {
+    font-size: 1.2em;
+}
